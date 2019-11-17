@@ -57,7 +57,23 @@ function recherche($marque_ou_modele, $annee, $modele_ancien, $impot_max, $assur
 
 function genererPDF($voitures)
 {
-    $fpdf = new FPDF();
+    require('fpdf.php');
+    $pdf = new FPDF();
+
+    $pdf->AddPage();
+    $pdf->SetFont('Arial', '', 12);
+    $pdf->Cell(20, 10, "Marque", 1);
+    $pdf->Cell(30, 10, "Modele", 1);
+    $pdf->Cell(20, 10, "Annee", 1);
+    $pdf->Cell(30, 10, "Cout(impot + assurance)", 1, 1);
+    for ($i = 0; $i < count($voitures); $i++) {
+        $voiture = $voitures[$i];
+        $pdf->Cell(20, 10, $voiture['marque'], 1);
+        $pdf->Cell(30, 10, $voiture['modele'], 1);
+        $pdf->Cell(20, 10, $voiture['annee'], 1);
+        $pdf->Cell(30, 10, $voiture['impot'] + $voiture['assurance'], 1, 1);
+    }
+    $pdf->Output();
 }
 
 ?>
