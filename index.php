@@ -58,11 +58,13 @@ function recherche($marque_ou_modele, $annee, $modele_ancien, $impot_max, $assur
 
 function showHTML($voitures)
 {
+//
     ?>
-    <pre>
-        <?php print_r($voitures) ?>
-    </pre>
-    <?php
+    <!--    <pre>-->
+    <!--        --><?php //print_r($voitures)
+    ?>
+    <!--    </pre>-->
+    <!--    --><?php
 }
 
 ?>
@@ -123,6 +125,28 @@ function showHTML($voitures)
 
 <div>
 
+    <?php if ($format == "HTML"): ?>
+
+        <table border="1">
+            <thead>
+            <th> Marque</th>
+            <th> Modèle</th>
+            <th> Année</th>
+            <th> Coût(impôt + assurance)</th>
+            </thead>
+            <tbody>
+            <?php foreach ($voitures as $voiture): ?>
+                <tr>
+                    <td><?= $voiture['marque'] ?></td>
+                    <td><?= $voiture['modele'] ?></td>
+                    <td><?= $voiture['annee'] ?></td>
+                    <td><?= $voiture['impot'] + $voiture['assurance'] ?></td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+        </table>
+
+    <?php endif ?>
 </div>
 
 </body>
