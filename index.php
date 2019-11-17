@@ -1,5 +1,7 @@
 <?php
 
+$format = null;
+
 if (isset($_GET['recherche'])) {
 
     $voitures = [];
@@ -16,9 +18,18 @@ if (isset($_GET['recherche'])) {
         $tri = $_POST['tri'];
     $voitures = recherche($marque_ou_modele, $annee, $modele_ancien, $impot_max, $assurance_max, $tri);
 
-    $format = $_POST['format'];
-    if ($format == "PDF") {
-        genererPDF($voitures);
+    if (isset($_GET['CSV'])) {
+        genererCSV($voitures);
+    } else {
+        $format = $_POST['format'];
+        if ($format == "PDF")
+            genererPDF($voitures);
+        if ($format == "CSV")
+            genererCSV($voitures);
+        if ($format == "JSON")
+            genererJSON($voitures);
+        if ($format == "XML")
+            genererXML($voitures);
     }
 }
 
@@ -30,7 +41,7 @@ function recherche($marque_ou_modele, $annee, $modele_ancien, $impot_max, $assur
 
     $pdo = new PDO($dsn, $user, $passwd);
 
-    $query = "SELECT * FROM voitures WHERE ";
+    $query = "SELECT marque,modele,annee,impot + assurance AS 'cout' FROM voitures WHERE ";
 
     if ($marque_ou_modele)
         $query .= "(marque LIKE '{$marque_ou_modele}%' OR modele LIKE '{$marque_ou_modele}%') ";
@@ -65,15 +76,50 @@ function genererPDF($voitures)
     $pdf->Cell(20, 10, "Marque", 1);
     $pdf->Cell(30, 10, "Modele", 1);
     $pdf->Cell(20, 10, "Annee", 1);
-    $pdf->Cell(30, 10, "Cout(impot + assurance)", 1, 1);
+    $pdf->Cell(50, 10, "Cout(impot + assurance)", 1, 1);
     for ($i = 0; $i < count($voitures); $i++) {
         $voiture = $voitures[$i];
         $pdf->Cell(20, 10, $voiture['marque'], 1);
         $pdf->Cell(30, 10, $voiture['modele'], 1);
         $pdf->Cell(20, 10, $voiture['annee'], 1);
-        $pdf->Cell(30, 10, $voiture['impot'] + $voiture['assurance'], 1, 1);
+        $pdf->Cell(50, 10, $voiture['cout'], 1, 1);
     }
     $pdf->Output();
+}
+
+function genererCSV($voitures)
+{
+    $fp = fopen('file.csv', 'w');
+
+    fwrite($fp, "marque; modele; annee; coût(impot + assurance);");
+    foreach ($voitures as $voiture) {
+        fputcsv($fp, $voiture);
+    }
+
+    fclose($fp);
+}
+
+function genererJSON($voitures)
+{
+    $fp = fopen('file.txt', 'w');
+    fwrite($fp, json_encode($voitures));
+    fclose($fp);
+}
+
+function genererXML($voitures)
+{
+    $fp = fopen('xml.txt', 'w');
+    foreach ($voitures as $voiture) {
+        fwrite($fp, "
+                <voiture>
+                    <marque>" . $voiture['marque'] . "</marque>
+                    <modele>" . $voiture['modele'] . "</modele>
+                    <annee>" . $voiture['annee'] . "</annee>
+                    <cout>" . $voiture['cout'] . "</cout>
+                </voiture>
+            ");
+    }
+    fclose($fp);
 }
 
 ?>
@@ -124,6 +170,9 @@ function genererPDF($voitures)
         <select name="format">
             <option value="HTML" selected="selected">HTML</option>
             <option value="PDF">PDF</option>
+            <option value="CSV">CSV</option>
+            <option value="JSON">JSON</option>
+            <option value="XML">XML</option>
         </select>
     </div>
 
@@ -149,7 +198,7 @@ function genererPDF($voitures)
                     <td><?= $voiture['marque'] ?></td>
                     <td><?= $voiture['modele'] ?></td>
                     <td><?= $voiture['annee'] ?></td>
-                    <td><?= $voiture['impot'] + $voiture['assurance'] ?></td>
+                    <td><?= $voiture['cout'] ?></td>
                 </tr>
             <?php endforeach ?>
             </tbody>
