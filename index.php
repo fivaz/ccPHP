@@ -17,8 +17,9 @@ if (isset($_GET['recherche'])) {
     $voitures = recherche($marque_ou_modele, $annee, $modele_ancien, $impot_max, $assurance_max, $tri);
 
     $format = $_POST['format'];
-    if ($format == "HTML")
-        showHTML($voitures);
+    if ($format == "PDF") {
+        genererPDF($voitures);
+    }
 }
 
 function recherche($marque_ou_modele, $annee, $modele_ancien, $impot_max, $assurance_max, $tri)
@@ -49,22 +50,14 @@ function recherche($marque_ou_modele, $annee, $modele_ancien, $impot_max, $assur
     else if ($tri == "cout")
         $query .= "(impot + assurance) ASC";
 
-//    echo $query;
-
     $stm = $pdo->query($query);
 
     return $stm->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function showHTML($voitures)
+function genererPDF($voitures)
 {
-//
-    ?>
-    <!--    <pre>-->
-    <!--        --><?php //print_r($voitures)
-    ?>
-    <!--    </pre>-->
-    <!--    --><?php
+    $fpdf = new FPDF();
 }
 
 ?>
